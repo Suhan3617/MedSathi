@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+/* Agar aap Tailwind v4 use kar rahe ho toh ye import hoga */
+@import "tailwindcss";
+
+/* 1. Ye ek line add karne se Tailwind ko pata chal jayega ki 'dark' class use karni hai */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 2. Global Light & Dark Theme Colors */
+body {
+  @apply bg-[#F7FAFC] text-slate-900 transition-colors duration-300;
+}
+
+.dark body {
+  @apply bg-[#0B1220] text-slate-100;
+}
+
+:root {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --secondary-color: #64748b;
+  --background-color: #f8fafc;
+  --surface-color: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+html {
+  scroll-behavior: smooth;
+}

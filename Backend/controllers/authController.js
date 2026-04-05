@@ -1,0 +1,221 @@
+const User = require("../models/user");
+const DoctorProfile = require("../models/DoctorProfile");
+const PatientProfile = require("../models/PatientProfile");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+const generateToken = (id, role) => {
+  return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "30d" });
+};
+
+// --- REGISTER PATIENT ---
+const registerPatient = async (req, res, next) => {
+  try {
+    const {
+      name,
+      email,
+      password,
+      gender,
+      phone,
+      dateOfBirth,
+      bloodGroup,
+      emergencyContactName,
+      emergencyContactPhone,
+    } = req.body;
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "patient",
+      gender,
+      phone,
+    });
+
+    await PatientProfile.create({
+      userId: user._id,
+      dateOfBirth,
+      bloodGroup,
+      emergencyContact: {
+        name: emergencyContactName,
+        phone: emergencyContactPhone,
+      },
+    });
+
+    const token = generateToken(user._id, user.role);
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        token,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// --- REGISTER DOCTOR ---
+const registerDoctor = async (req, res, next) => {
+  try {
+    const {
+      name,
+      email,
+      password,
+      gender,
+      phone,
+      specialization,
+      experience,
+      medicalRegNumber,
+      clinicName,
+      clinicAddress,
+      qualifications,
+    } = req.body;
+
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "doctor",
+      gender,
+      phone,
+      isVerified: false,
+    });
+
+    await DoctorProfile.create({
+      userId: user._id,
+      specialization: specialization || "General",
+      experience: experience || 0,
+      clinicAddress: clinicAddress || "Not Provided",
+      about: `Practicing at ${clinicName}`,
+      qualifications: qualifications || ["MBBS"],
+      isApproved: false,
+    });
+
+    const token = generateToken(user._id, user.role);
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        token,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).select("+password");
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const token = generateToken(user._id, user.role);
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        token,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // User ko database se nikalenge (password field explicitly select karni padti hai)
+    const user = await User.findById(req.user.id).select("+password");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // Current password check karo
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    // Agar tumhare User model mein method hai toh ye use kar sakte ho:
+    // const isMatch = await user.matchPassword(currentPassword);
+
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Current password is incorrect" });
+    }
+
+    // Naya password set karo (Assuming tumhare User model mein pre-save hook hai jo isko hash kar dega)
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const logout = (req, res) => {
+  res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) });
+  res.status(200).json({ success: true, message: "Logged out successfully" });
+};
+
+module.exports = {
+  registerPatient,
+  registerDoctor,
+  login,
+  logout,
+  changePassword,
+};
