@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   FiUser,
   FiBriefcase,
-  FiFileText,
   FiArrowRight,
   FiArrowLeft,
   FiCheckCircle,
@@ -36,6 +35,8 @@ const textPrimary = "text-slate-900 dark:text-slate-100";
 const textSecondary = "text-slate-600 dark:text-slate-400";
 const textMuted = "text-slate-500 dark:text-slate-400";
 
+const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
 const Signup = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,9 +50,10 @@ const Signup = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // 🔥 NEW: Dark Mode State
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Custom Dropdown State for Blood Group
+  const [isBgMenuOpen, setIsBgMenuOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -62,8 +64,6 @@ const Signup = () => {
     specialization: "General Physician",
     experience: "",
     medicalRegNumber: "",
-    clinicAddress: "",
-    clinicName: "",
     dateOfBirth: "",
     bloodGroup: "",
     emergencyContactName: "",
@@ -76,18 +76,54 @@ const Signup = () => {
   }, [location]);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // 🔥 STRICT VALIDATION: Allow ONLY numbers for Phone fields
+    if (
+      (name === "phone" || name === "emergencyContactPhone") &&
+      value !== ""
+    ) {
+      if (!/^\d+$/.test(value)) return;
+    }
+
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleRoleSwitch = (newRole) => {
     setRole(newRole);
     setStep(1);
+    setError(""); // 🔥 BUG FIXED: Alert clears when switching roles
     navigate(`/signup/${newRole}`);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    // 🔥 STRICT VALIDATION: Check proper Email format
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid email address (e.g., name@example.com).");
+      return;
+    }
+
+    // Phone length validation (Exactly 10 since maxLength is 10)
+    if (formData.phone.length < 10) {
+      setError("Phone number must be exactly 10 digits long.");
+      return;
+    }
+
+    if (
+      !isDoc &&
+      formData.emergencyContactPhone &&
+      formData.emergencyContactPhone.length < 10
+    ) {
+      setError(
+        "Emergency contact phone number must be exactly 10 digits long.",
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -106,7 +142,6 @@ const Signup = () => {
     }
   };
 
-  // 🔥 NEW: Toggle Function
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
   // --- THEME DATA ---
@@ -155,7 +190,7 @@ const Signup = () => {
           value={formData.name}
           onChange={handleChange}
           required
-          placeholder="Your full name"
+          placeholder="e.g. Rahul Sharma"
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -168,19 +203,20 @@ const Signup = () => {
             value={formData.email}
             onChange={handleChange}
             required
-            placeholder="name@example.com"
+            placeholder="e.g. rahul@example.com"
           />
         </div>
         <div>
           <label className={labelBase}>Phone Number</label>
           <input
             className={inputBase}
-            type="tel"
+            type="text"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
             required
-            placeholder="00000-00000"
+            maxLength="10"
+            placeholder="10-digit mobile number"
           />
         </div>
       </div>
@@ -194,7 +230,7 @@ const Signup = () => {
             value={formData.password}
             onChange={handleChange}
             required
-            placeholder="Min 6 characters"
+            placeholder="Min. 6 characters"
             minLength="6"
           />
         </div>
@@ -218,7 +254,7 @@ const Signup = () => {
   return (
     <div className={isDarkMode ? "dark" : ""}>
       <div className="min-h-screen bg-[#F7FAFC] dark:bg-[#0A0F1E] flex items-center justify-center p-4 sm:p-6 font-sans relative overflow-hidden transition-colors duration-300">
-        {/* 🔥 NEW: Theme Toggle Button */}
+        {/* Theme Toggle Button */}
         <button
           onClick={toggleTheme}
           className="absolute top-6 right-6 p-3 rounded-full bg-white/80 dark:bg-[#1E293B]/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-lg text-slate-600 dark:text-slate-300 hover:scale-105 transition-transform z-50 focus:outline-none"
@@ -239,13 +275,11 @@ const Signup = () => {
 
         {/* Main Glass Container */}
         <div className="w-full max-w-5xl bg-white/70 dark:bg-[#e2e8f0]/[0.02] backdrop-blur-[16px] border border-black/5 dark:border-white/[0.06] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] rounded-3xl overflow-hidden relative z-10 flex flex-col md:flex-row h-[90vh] md:h-auto md:min-h-[600px] md:max-h-[85vh]">
-          {/* LEFT PANEL - Visual Storytelling (Hidden on Mobile) */}
+          {/* LEFT PANEL */}
           <div
             className={`hidden md:flex flex-col justify-between w-2/5 p-10 lg:p-12 relative overflow-hidden bg-gradient-to-br ${theme.primaryBg}`}
           >
-            {/* Overlay Pattern */}
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] bg-[size:24px_24px]"></div>
-
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-16">
                 <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center">
@@ -266,7 +300,6 @@ const Signup = () => {
                   MedSathi.
                 </span>
               </div>
-
               <div className="text-white/90 drop-shadow-md mb-6 p-4 bg-white/10 backdrop-blur-sm rounded-2xl inline-block border border-white/20">
                 {theme.icon}
               </div>
@@ -277,7 +310,6 @@ const Signup = () => {
                 {theme.heroSub}
               </p>
             </div>
-
             <div className="relative z-10">
               <p className="text-white/60 text-sm font-medium">
                 © 2026 MedSathi Technologies.
@@ -289,7 +321,6 @@ const Signup = () => {
           <div className="w-full md:w-3/5 flex flex-col p-6 sm:p-10 lg:p-12 bg-white/50 dark:bg-transparent relative h-full overflow-y-auto custom-scrollbar">
             {/* Top Navigation / Switcher */}
             <div className="flex justify-between items-center mb-8 shrink-0">
-              {/* Mobile Logo */}
               <div className="flex md:hidden items-center gap-2">
                 <div
                   className={`w-8 h-8 rounded-lg bg-gradient-to-br ${theme.primaryBg} flex items-center justify-center shadow-lg`}
@@ -318,8 +349,7 @@ const Signup = () => {
                   </span>
                 </span>
               </div>
-              <div className="hidden md:block"></div> {/* Spacer for desktop */}
-              {/* Role Switcher */}
+              <div className="hidden md:block"></div>
               <div className="flex bg-slate-200/60 dark:bg-slate-800/60 backdrop-blur-md p-1 rounded-xl border border-white/40 dark:border-white/5 shadow-inner">
                 <button
                   type="button"
@@ -409,7 +439,7 @@ const Signup = () => {
                   </motion.div>
                 )}
 
-                {/* DOCTOR - STEP 2 */}
+                {/* DOCTOR - STEP 2 (Final Submit) */}
                 {isDoc && step === 2 && (
                   <motion.div
                     key="d2"
@@ -445,7 +475,7 @@ const Signup = () => {
                           value={formData.medicalRegNumber}
                           onChange={handleChange}
                           required
-                          placeholder="MCI-12345"
+                          placeholder="e.g. MCI-12345"
                         />
                       </div>
                       <div>
@@ -457,20 +487,7 @@ const Signup = () => {
                           value={formData.experience}
                           onChange={handleChange}
                           required
-                          placeholder="5"
-                        />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <label className={labelBase}>
-                          Clinic/Hospital Name
-                        </label>
-                        <input
-                          className={inputBase}
-                          name="clinicName"
-                          value={formData.clinicName}
-                          onChange={handleChange}
-                          required
-                          placeholder="City Care Hospital"
+                          placeholder="e.g. 5"
                         />
                       </div>
                     </div>
@@ -479,64 +496,6 @@ const Signup = () => {
                       <button
                         type="button"
                         onClick={() => setStep(1)}
-                        className="p-3.5 rounded-xl font-bold text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none flex items-center justify-center shrink-0"
-                      >
-                        <FiArrowLeft size={18} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setStep(3)}
-                        className={`flex-1 py-3.5 rounded-xl font-bold text-sm text-white shadow-lg flex items-center justify-center gap-2 bg-gradient-to-r ${theme.primaryBg} ${theme.btnHover}`}
-                      >
-                        Verify Profile <FiArrowRight />
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* DOCTOR - STEP 3 */}
-                {isDoc && step === 3 && (
-                  <motion.div
-                    key="d3"
-                    variants={formVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    className="space-y-6 flex flex-col justify-center flex-1"
-                  >
-                    <div>
-                      <label className={labelBase}>
-                        Upload License{" "}
-                        <span className="font-normal normal-case text-[10px] opacity-70">
-                          (Optional)
-                        </span>
-                      </label>
-                      <div
-                        className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all bg-slate-50/50 dark:bg-slate-800/30 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 border-slate-300 dark:border-slate-700 hover:border-blue-400 dark:hover:border-cyan-500 group`}
-                      >
-                        <FiFileText
-                          size={36}
-                          className={`mx-auto mb-3 opacity-50 group-hover:opacity-100 transition-opacity ${theme.primaryText}`}
-                        />
-                        <span
-                          className={`font-bold text-sm ${theme.primaryText}`}
-                        >
-                          Click to upload document
-                        </span>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-                          PDF, JPG or PNG (Max 5MB)
-                        </p>
-                        <input
-                          type="file"
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 mt-auto pt-4">
-                      <button
-                        type="button"
-                        onClick={() => setStep(2)}
                         className="p-3.5 rounded-xl font-bold text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none flex items-center justify-center shrink-0"
                       >
                         <FiArrowLeft size={18} />
@@ -558,9 +517,6 @@ const Signup = () => {
                         )}
                       </button>
                     </div>
-                    <p className="text-[10px] font-semibold text-center text-slate-400 uppercase tracking-widest">
-                      * Verification required before activation
-                    </p>
                   </motion.div>
                 )}
 
@@ -585,7 +541,7 @@ const Signup = () => {
                   </motion.div>
                 )}
 
-                {/* PATIENT - STEP 2 */}
+                {/* PATIENT - STEP 2 (Final Submit) */}
                 {!isDoc && step === 2 && (
                   <motion.div
                     key="p2"
@@ -604,7 +560,7 @@ const Signup = () => {
                           (Optional)
                         </span>
                       </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
                         <div>
                           <label className={labelBase}>Date of Birth</label>
                           <input
@@ -615,21 +571,71 @@ const Signup = () => {
                             onChange={handleChange}
                           />
                         </div>
-                        <div>
+
+                        {/* 🔥 CUSTOM BLOOD GROUP DROPDOWN UI */}
+                        <div className="relative">
                           <label className={labelBase}>Blood Group</label>
-                          <select
-                            className={inputBase}
-                            name="bloodGroup"
-                            value={formData.bloodGroup}
-                            onChange={handleChange}
+                          <div
+                            tabIndex={0}
+                            onBlur={() =>
+                              setTimeout(() => setIsBgMenuOpen(false), 200)
+                            }
+                            onClick={() => setIsBgMenuOpen(!isBgMenuOpen)}
+                            className={`${inputBase} flex justify-between items-center cursor-pointer select-none`}
                           >
-                            <option value="">Select</option>
-                            <option value="A+">A+</option>
-                            <option value="O+">O+</option>
-                            <option value="B+">B+</option>
-                            <option value="AB+">AB+</option>
-                          </select>
+                            <span
+                              className={
+                                formData.bloodGroup
+                                  ? "text-slate-900 dark:text-slate-100"
+                                  : "text-slate-400 dark:text-slate-500"
+                              }
+                            >
+                              {formData.bloodGroup || "Select Type"}
+                            </span>
+                            <svg
+                              className={`w-4 h-4 transition-transform duration-300 ${isBgMenuOpen ? "rotate-180" : ""}`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M19 9l-7 7-7-7"
+                              ></path>
+                            </svg>
+                          </div>
+                          <AnimatePresence>
+                            {isBgMenuOpen && (
+                              <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="absolute z-50 w-full mt-2 bg-white/95 dark:bg-[#1E293B]/95 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_25px_rgba(0,0,0,0.5)] overflow-hidden"
+                              >
+                                <div className="max-h-48 overflow-y-auto custom-scrollbar py-1">
+                                  {bloodGroups.map((bg) => (
+                                    <div
+                                      key={bg}
+                                      onClick={() => {
+                                        setFormData({
+                                          ...formData,
+                                          bloodGroup: bg,
+                                        });
+                                        setIsBgMenuOpen(false);
+                                      }}
+                                      className={`px-4 py-2.5 text-sm cursor-pointer transition-colors ${formData.bloodGroup === bg ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 font-bold" : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"}`}
+                                    >
+                                      {bg}
+                                    </div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
+
                         <div>
                           <label className={labelBase}>Emergency Contact</label>
                           <input
@@ -637,17 +643,19 @@ const Signup = () => {
                             name="emergencyContactName"
                             value={formData.emergencyContactName}
                             onChange={handleChange}
-                            placeholder="Contact Name"
+                            placeholder="e.g. Anjali Sharma"
                           />
                         </div>
                         <div>
                           <label className={labelBase}>Emergency Phone</label>
                           <input
                             className={inputBase}
+                            type="text"
                             name="emergencyContactPhone"
                             value={formData.emergencyContactPhone}
                             onChange={handleChange}
-                            placeholder="Contact Phone"
+                            placeholder="10-digit mobile number"
+                            maxLength="10"
                           />
                         </div>
                       </div>
@@ -693,7 +701,7 @@ const Signup = () => {
               </Link>
             </div>
 
-            {/* Mobile Footer Links */}
+            {/* Footer Links */}
             <div className="md:hidden shrink-0 flex justify-center gap-6 mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-800/50 text-xs font-semibold text-slate-400">
               <a
                 href="#"
@@ -714,8 +722,6 @@ const Signup = () => {
                 Help
               </a>
             </div>
-
-            {/* Desktop Footer Links */}
             <div className="hidden md:flex shrink-0 justify-between items-center mt-4 pt-4 border-t border-slate-200/50 dark:border-slate-800/50 text-xs font-semibold text-slate-400">
               <span>© 2026 MedSathi Inc.</span>
               <div className="flex gap-6">
@@ -742,7 +748,7 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Inject Custom Scrollbar Styles */}
+        {/* Custom Styles */}
         <style
           dangerouslySetInnerHTML={{
             __html: `
@@ -777,4 +783,3 @@ const Signup = () => {
 };
 
 export default Signup;
- 

@@ -16,7 +16,9 @@ import AppointmentCard from "../components/MyAppointments/AppointmentCard";
 
 const MyAppointments = () => {
   const { user } = useAuth();
+
   const navigate = useNavigate();
+
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,8 +27,11 @@ const MyAppointments = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [activeCallAppointment, setActiveCallAppointment] = useState(null);
+
   const [infoPatientId, setInfoPatientId] = useState(null);
+
   const [viewingRx, setViewingRx] = useState(null);
+
   const [ratingAppointment, setRatingAppointment] = useState(null);
 
   useEffect(() => {
@@ -35,11 +40,14 @@ const MyAppointments = () => {
 
   const fetchAppointments = async () => {
     setLoading(true);
+
     try {
       const res = await getMyAppointments();
+
       const sorted = (res.data || []).sort(
-        (a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate)
+        (a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate),
       );
+
       setAppointments(sorted);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -51,12 +59,17 @@ const MyAppointments = () => {
   const handleStatusUpdate = async (id, newStatus) => {
     if (
       !window.confirm(
-        `Are you sure you want to mark this appointment as ${newStatus}?`
+        `Are you sure you want to mark this appointment as ${newStatus}?`,
       )
-    )
+    ) {
       return;
+    }
+
     try {
-      await updateAppointmentStatus(id, { status: newStatus });
+      await updateAppointmentStatus(id, {
+        status: newStatus,
+      });
+
       fetchAppointments();
     } catch (error) {
       alert("Failed to update status");
@@ -66,17 +79,23 @@ const MyAppointments = () => {
   const handleStartChat = (otherParty) => {
     const route =
       user.role === "doctor" ? "/doctor/messages" : "/patient/messages";
-    navigate(route, { state: { selectedUser: otherParty } });
+
+    navigate(route, {
+      state: { selectedUser: otherParty },
+    });
   };
 
   const handleJoinCall = (appointment) => setActiveCallAppointment(appointment);
 
   const filteredAppointments = appointments.filter((appt) => {
     const statusMatch = filter === "All" || appt.status === filter;
+
     const otherParty = user.role === "doctor" ? appt.patientId : appt.doctorId;
+
     const searchMatch = (otherParty?.name || "")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
+
     return statusMatch && searchMatch;
   });
 
@@ -92,15 +111,32 @@ const MyAppointments = () => {
 
   // Animation Variants for List
   const containerVariants = {
-    hidden: { opacity: 0 },
-    show: { opacity: 1, transition: { staggerChildren: 0.05 } },
+    hidden: {
+      opacity: 0,
+    },
+
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+      },
+    },
   };
+
   const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
+    hidden: {
+      opacity: 0,
+      y: 10,
+    },
+
     show: {
       opacity: 1,
       y: 0,
-      transition: { type: "spring", stiffness: 300, damping: 24 },
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24,
+      },
     },
   };
 
@@ -115,9 +151,11 @@ const MyAppointments = () => {
       />
 
       {/* --- CONTENT SECTION --- */}
+
       {loading ? (
         <div className="loading-state flex flex-col items-center justify-center py-20 gap-4">
           <div className="w-8 h-8 border-2 border-[#06B6D4]/30 border-t-[#06B6D4] rounded-full animate-spin" />
+
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
             Syncing schedule...
           </p>
@@ -131,9 +169,11 @@ const MyAppointments = () => {
           <div className="empty-icon w-16 h-16 rounded-full bg-black/[0.03] dark:bg-white/[0.05] flex items-center justify-center text-slate-300 dark:text-slate-600 mb-4">
             <FiCalendar size={28} />
           </div>
+
           <h3 className="text-lg font-bold text-slate-800 dark:text-[#F1F5F9] m-0 mb-2">
             No appointments found
           </h3>
+
           <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs m-0 mb-6">
             We couldn't find any records matching your current filters.
           </p>
@@ -145,7 +185,8 @@ const MyAppointments = () => {
               onClick={() => navigate("/find-doctors")}
               className="action-btn px-5 py-2.5 bg-gradient-to-r from-[#2563EB] to-[#06B6D4] text-white rounded-[14px] font-semibold text-sm flex items-center gap-2 shadow-lg shadow-cyan-500/25 border border-white/10"
             >
-              <FiSearch className="btn-icon" /> Book Consultation
+              <FiSearch className="btn-icon" />
+              Book Consultation
             </motion.button>
           )}
         </motion.div>
@@ -175,24 +216,28 @@ const MyAppointments = () => {
       )}
 
       {/* Modals & Widgets */}
+
       {activeCallAppointment && (
         <VideoCallWidget
           appointment={activeCallAppointment}
           onClose={() => setActiveCallAppointment(null)}
         />
       )}
+
       {infoPatientId && (
         <QuickInfoModal
           patientId={infoPatientId}
           onClose={() => setInfoPatientId(null)}
         />
       )}
+
       {viewingRx && (
         <PrescriptionViewer
           appointment={viewingRx}
           onClose={() => setViewingRx(null)}
         />
       )}
+
       {ratingAppointment && (
         <RatingModal
           appointment={ratingAppointment}
@@ -202,15 +247,39 @@ const MyAppointments = () => {
       )}
 
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.1); border-radius: 10px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
-        
-        .glass-scroll::-webkit-scrollbar { width: 6px; }
-        .glass-scroll::-webkit-scrollbar-track { background: transparent; }
-        .glass-scroll::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.1); border-radius: 10px; }
-        .dark .glass-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(15, 23, 42, 0.1);
+          border-radius: 10px;
+        }
+
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .glass-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .glass-scroll::-webkit-scrollbar-thumb {
+          background: rgba(15, 23, 42, 0.1);
+          border-radius: 10px;
+        }
+
+        .dark .glass-scroll::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+        }
       `}</style>
     </div>
   );
