@@ -96,7 +96,7 @@ const FeaturesSection = () => {
           </motion.div>
         </div>
 
-        <div className="mt-24 max-w-6xl mx-auto">
+        {/* <div className="mt-24 max-w-6xl mx-auto">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50/80 dark:bg-cyan-900/20 border border-blue-200/50 dark:border-cyan-800/30 text-blue-600 dark:text-cyan-400 text-xs font-bold uppercase tracking-wide mb-4 shadow-sm backdrop-blur-sm">
               <FiMaximize className="w-3.5 h-3.5" /> Detailed View
@@ -116,7 +116,7 @@ const FeaturesSection = () => {
               <ProductCarousel autoSlide={true} slides={featureSlides} />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );

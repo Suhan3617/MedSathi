@@ -69,7 +69,7 @@ const LandingPage = () => {
         <FeaturesSection />
         <HowItWorksSection />
         <CommunicationSection />
-        <DashboardSection />
+        {/* <DashboardSection /> */}
         
         <Footer setActiveModal={setActiveModal} />
 

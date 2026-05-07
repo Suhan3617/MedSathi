@@ -61,6 +61,20 @@ We drastically reduce the documentation burden on healthcare providers.
 
 ---
 
+## 📸 Application Screenshots
+
+Here is a glimpse into the MedSathi platform:
+
+| Patient & AI Features | Doctor & Telemedicine |
+| :---: | :---: |
+| **AI Symptom Checker**<br>![AI Symptom Checker](./photos/AI_Sympton_checker.png) | **Doctor Dashboard 1**<br>![Doctor Dashboard 1](./photos/doctor_dashboard1.png) |
+| **Patient Dashboard**<br>![Patient Dashboard](./photos/Patient_dashboard.png) | **Doctor Dashboard 2**<br>![Doctor Dashboard 2](./photos/doctor_dashboard2.png) |
+| **MedSathi AI Assistant**<br>![MedSathi AI](./photos/MedSathiAI.png) | **Appointments Page**<br>![Appointments Page](./photos/Appointments_page.png) |
+| **Find a Doctor**<br>![Find Doctor](./photos/Find_doctor.png) | **Video Call Interface**<br>![Video Call](./photos/Video_call.png) |
+| **Prescription Viewer**<br>![Prescription](./photos/Prescription.png) | **Secure Messaging**<br>![Messages](./photos/messages.png) |
+
+---
+
 ## 📂 System Structure
 
 ```text
@@ -71,13 +85,14 @@ MedSathi/
 │   ├── routes/           # Express API endpoints
 │   ├── utils/            # Helper functions (Gemini config, Cloudinary setup, Middleware)
 │   └── server.js         # Core entry point and middleware configuration
-└── Frontend/
-    ├── src/
-    │   ├── assets/       # Static assets, images, and SVGs
-    │   ├── components/   # Reusable UI components (Navbar, Sidebar, Interactive Modals)
-    │   ├── context/      # React Context providers (AuthContext, ThemeContext)
-    │   ├── pages/        # Main application views (Dashboard, SymptomChecker, FindDoctors)
-    │   ├── services/     # Axios API call configurations and interceptors
-    │   └── App.jsx       # Main application routing and auth guards
-    ├── tailwind.config.js
-    └── vite.config.js
+├── Frontend/
+│   ├── src/
+│   │   ├── assets/       # Static assets, images, and SVGs
+│   │   ├── components/   # Reusable UI components (Navbar, Sidebar, Interactive Modals)
+│   │   ├── context/      # React Context providers (AuthContext, ThemeContext)
+│   │   ├── pages/        # Main application views (Dashboard, SymptomChecker, FindDoctors)
+│   │   ├── services/     # Axios API call configurations and interceptors
+│   │   └── App.jsx       # Main application routing and auth guards
+│   ├── tailwind.config.js
+│   └── vite.config.js
+└── photos/               # Repository showcase images

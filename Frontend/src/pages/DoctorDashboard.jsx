@@ -1,6 +1,6 @@
 // src/pages/DoctorDashboard.jsx
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // 🔥 Added useNavigate
+import { useNavigate } from "react-router-dom"; 
 import { useAuth } from "../context/AuthContext";
 import {
   getMyAppointments,
@@ -19,11 +19,11 @@ import AnalyticsPanel from "../components/Doctor/dashboard/AnalyticsPanel";
 import DashboardOverview from "../components/Doctor/dashboard/DashboardOverview";
 
 // Theme / Styling
-import { textPrimary , textMuted , primaryGradientText } from "../components/Doctor/dashboard/dashboardTheme";
+import { textPrimary, textMuted, primaryGradientText } from "../components/Doctor/dashboard/dashboardTheme";
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
-  const navigate = useNavigate(); // 🔥 Initialize navigate
+  const navigate = useNavigate(); 
   const [viewMode, setViewMode] = useState("overview");
 
   // Data State
@@ -50,16 +50,9 @@ const DoctorDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // 🔥 1. Fetch Profile & Check if Complete
+      // 1. Fetch Profile (Kept for future use, but removed the alert/redirect)
       const profRes = await getDoctorProfileMe();
       const docProfile = profRes?.data;
-      
-      // If essential fields like bio or fee are missing, force profile completion
-      if (docProfile && (!docProfile.bio || !docProfile.consultationFee)) {
-        alert("Welcome to MedSathi! Please complete your profile details (like Bio & Consultation Fee) before managing appointments.");
-        navigate("/doctor/profile");
-        return; // Stop loading dashboard and redirect
-      }
 
       // 2. Load Appointments
       const apptRes = await getMyAppointments();
