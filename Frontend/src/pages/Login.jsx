@@ -9,6 +9,8 @@ import {
   FiLoader,
   FiSun,
   FiMoon,
+  FiEye,
+  FiEyeOff,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -30,8 +32,9 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🔥 NEW: Dark Mode State
+  // 🔥 NEW: Dark Mode & Password Visibility States
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -55,14 +58,12 @@ const Login = () => {
     setLoading(false);
   };
 
-  // 🔥 NEW: Toggle Function
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
 
-  // Wrap the entire component in a div that conditionally applies the "dark" class
   return (
     <div className={isDarkMode ? "dark" : ""}>
       <div className="min-h-screen bg-[#F7FAFC] dark:bg-[#0A0F1E] flex items-center justify-center p-4 sm:p-6 font-sans relative overflow-hidden transition-colors duration-300">
-        {/* 🔥 NEW: Theme Toggle Button */}
+        {/* Theme Toggle Button */}
         <button
           onClick={toggleTheme}
           className="absolute top-6 right-6 p-3 rounded-full bg-white/80 dark:bg-[#1E293B]/80 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-lg text-slate-600 dark:text-slate-300 hover:scale-105 transition-transform z-50 focus:outline-none"
@@ -207,15 +208,24 @@ const Login = () => {
 
                 <div>
                   <label className={labelBase}>Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    className={inputBase}
-                    placeholder="••••••••"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      className={`${inputBase} pr-12`}
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors focus:outline-none"
+                    >
+                      {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                    </button>
+                  </div>
                 </div>
 
                 <motion.button

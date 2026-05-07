@@ -13,6 +13,8 @@ import {
   FiActivity,
   FiSun,
   FiMoon,
+  FiEye,
+  FiEyeOff,
 } from "react-icons/fi";
 
 // --- ANIMATION VARIANTS ---
@@ -51,6 +53,7 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Custom Dropdown State for Blood Group
   const [isBgMenuOpen, setIsBgMenuOpen] = useState(false);
@@ -223,16 +226,25 @@ const Signup = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className={labelBase}>Password</label>
-          <input
-            className={inputBase}
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            placeholder="Min. 6 characters"
-            minLength="6"
-          />
+          <div className="relative">
+            <input
+              className={`${inputBase} pr-12`}
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              placeholder="Min. 6 characters"
+              minLength="6"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors focus:outline-none"
+            >
+              {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+            </button>
+          </div>
         </div>
         <div>
           <label className={labelBase}>Gender</label>
