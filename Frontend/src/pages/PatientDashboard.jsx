@@ -1,4 +1,6 @@
+// src/pages/PatientDashboard.jsx
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom"; // 🔥 Added useNavigate
 import { useAuth } from "../context/AuthContext";
 import {
   getMyAppointments,
@@ -21,6 +23,7 @@ import { HEALTH_TIPS , staggerContainer } from "../components/Patient/PatientDas
 
 const PatientDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate(); // 🔥 Initialize navigate
 
   // ---------------- STATES ----------------
   const [loading, setLoading] = useState(true);
@@ -50,7 +53,20 @@ const PatientDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // --- Appointments ---
+      // 🔥 1. Fetch Profile & Check if Complete
+      const profRes = await getPatientProfile();
+      const pData = profRes?.data;
+      
+      // If optional fields from signup are completely empty, force profile completion
+      if (pData && !pData.dateOfBirth && !pData.bloodGroup && !pData.emergencyContactPhone) {
+        alert("Welcome to MedSathi! Please complete your medical profile for a better healthcare experience.");
+        navigate("/patient/profile");
+        return; // Stop loading dashboard and redirect
+      }
+      
+      setProfile(pData || {});
+
+      // 2. Fetch Appointments
       const apptRes = await getMyAppointments();
       const allAppts = apptRes?.data || [];
 
@@ -95,9 +111,6 @@ const PatientDashboard = () => {
 
       setChartData(chartArr);
 
-      // --- Profile ---
-      const profRes = await getPatientProfile();
-      setProfile(profRes?.data || {});
     } catch (err) {
       console.error("Dashboard Load Error:", err);
     } finally {

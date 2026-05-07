@@ -1,5 +1,6 @@
 // src/pages/DoctorDashboard.jsx
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // 🔥 Added useNavigate
 import { useAuth } from "../context/AuthContext";
 import {
   getMyAppointments,
@@ -22,6 +23,7 @@ import { textPrimary , textMuted , primaryGradientText } from "../components/Doc
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate(); // 🔥 Initialize navigate
   const [viewMode, setViewMode] = useState("overview");
 
   // Data State
@@ -48,7 +50,18 @@ const DoctorDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      await getDoctorProfileMe();
+      // 🔥 1. Fetch Profile & Check if Complete
+      const profRes = await getDoctorProfileMe();
+      const docProfile = profRes?.data;
+      
+      // If essential fields like bio or fee are missing, force profile completion
+      if (docProfile && (!docProfile.bio || !docProfile.consultationFee)) {
+        alert("Welcome to MedSathi! Please complete your profile details (like Bio & Consultation Fee) before managing appointments.");
+        navigate("/doctor/profile");
+        return; // Stop loading dashboard and redirect
+      }
+
+      // 2. Load Appointments
       const apptRes = await getMyAppointments();
       const allAppts = apptRes.data || [];
       const today = new Date().toDateString();
@@ -66,6 +79,7 @@ const DoctorDashboard = () => {
 
       updateDashboardState(uniqueAppts);
 
+      // 3. Load Analytics
       const analyticsRes = await getDoctorAnalytics();
       setAnalyticsData(analyticsRes.data);
     } catch (error) {
