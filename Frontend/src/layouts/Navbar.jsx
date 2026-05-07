@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FiSearch,
   FiBell,
   FiMenu,
   FiMoon,
@@ -83,27 +82,9 @@ const Navbar = ({ onMenuClick, isMobile, isOpen }) => {
                       Sathi
                     </span>
                   </span>
-
-                  {/* Subtle divider before search bar */}
-                  <div className="w-px h-6 bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block"></div>
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-
-          {/* Search Bar */}
-          <div className="flex items-center flex-1 bg-slate-100/70 dark:bg-[#ffffff06] border border-slate-200/60 dark:border-white/5 rounded-2xl px-4 py-2.5 focus-within:bg-white dark:focus-within:bg-[#0A0F1E] focus-within:ring-2 focus-within:ring-blue-500/30 dark:focus-within:ring-cyan-500/30 focus-within:border-blue-500/50 dark:focus-within:border-cyan-500/50 focus-within:shadow-[0_4px_20px_rgba(37,99,235,0.08)] dark:focus-within:shadow-[inset_0_0_15px_rgba(6,182,212,0.05)] transition-all duration-300 group">
-            <FiSearch
-              className="text-slate-400 dark:text-slate-500 group-focus-within:text-blue-500 dark:group-focus-within:text-cyan-400 transition-colors shrink-0"
-              size={18}
-            />
-            <input
-              type="text"
-              placeholder={
-                isMobile ? "Search..." : "Search patient records, doctors..."
-              }
-              className="w-full bg-transparent border-none outline-none ml-3 text-sm font-semibold text-slate-800 dark:text-[#F1F5F9] placeholder:text-slate-400 dark:placeholder:text-[#64748B] m-0 p-0"
-            />
           </div>
         </div>
 
@@ -118,16 +99,6 @@ const Navbar = ({ onMenuClick, isMobile, isOpen }) => {
           >
             {isDark ? <FiSun size={20} /> : <FiMoon size={20} />}
           </motion.button>
-
-          {/* <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="relative flex items-center justify-center w-10 h-10 rounded-xl text-slate-500 dark:text-[#CBD5E1] bg-transparent hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-            aria-label="Notifications"
-          >
-            <FiBell size={20} />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-[1.5px] border-white dark:border-[#0A0F1E]"></span>
-          </motion.button> */}
         </div>
       </div>
     </nav>

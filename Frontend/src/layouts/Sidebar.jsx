@@ -48,7 +48,6 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
         label: "Appointments",
         icon: <FiCalendar />,
       },
-      // Removed Medical Profile from here
     ];
   } else if (user?.role === "doctor") {
     menuItems = [
@@ -60,7 +59,6 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
       },
       { path: "/doctor/ai", label: "MedSathi AI", icon: <FiCpu /> },
       { path: "/doctor/appointments", label: "Schedule", icon: <FiCalendar /> },
-      // Removed Profile Settings from here
     ];
   }
 
@@ -150,47 +148,57 @@ const Sidebar = ({ isOpen, onClose, isMobile }) => {
           
         </nav>
 
-        {/* Footer / User Card (Now clicks to Profile) */}
+        {/* Footer / Premium User Card */}
         <div className="p-5 border-t border-slate-200/60 dark:border-white/5 shrink-0">
           <Link
             to={profileLink}
             onClick={() => isMobile && onClose()}
-            className="block outline-none mb-2"
+            className="block outline-none mb-3"
           >
             <motion.div
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-3 p-3 bg-white/60 dark:bg-[#ffffff06] backdrop-blur-md border border-slate-100 dark:border-white/5 rounded-[16px] shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+              className="group relative flex items-center gap-3 p-3.5 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 border border-slate-200/80 dark:border-slate-700/50 rounded-2xl shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-cyan-700/50 transition-all overflow-hidden cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-cyan-400 flex items-center justify-center font-extrabold text-sm border border-blue-200/50 dark:border-cyan-800/30 shrink-0 shadow-inner">
-                {user?.name?.charAt(0) || "U"}
+              {/* Subtle background glow effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/5 to-cyan-500/0 dark:from-cyan-500/0 dark:via-cyan-500/10 dark:to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+              <div className="relative w-11 h-11 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 text-white flex items-center justify-center font-bold text-lg shadow-[0_0_15px_rgba(37,99,235,0.3)] dark:shadow-[0_0_15px_rgba(6,182,212,0.3)] shrink-0 z-10">
+                {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-bold text-slate-800 dark:text-[#F1F5F9] truncate">
-                  Profile
+              
+              <div className="flex-1 min-w-0 z-10">
+                <div className="text-sm font-extrabold text-slate-800 dark:text-slate-100 truncate group-hover:text-blue-600 dark:group-hover:text-cyan-400 transition-colors">
+                  {user?.name || "My Profile"}
                 </div>
-                <div className="text-[11px] font-semibold text-slate-500 dark:text-[#64748B] capitalize tracking-wide">
-                  View & Edit
+                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">
+                  {user?.role === "doctor" ? "Doctor Account" : "Patient Account"}
                 </div>
+              </div>
+
+              <div className="text-slate-400 group-hover:text-blue-500 dark:group-hover:text-cyan-400 transition-colors z-10 shrink-0">
+                <FiSettings size={18} className="group-hover:rotate-90 transition-transform duration-500" />
               </div>
             </motion.div>
           </Link>
-            <button
-              onClick={() => {
-                if (isMobile) onClose();
-                handleLogout();
-              }}
-              className="w-full group flex items-center gap-3 px-3.5 py-3 rounded-[14px] text-sm font-semibold transition-all duration-250 ease-out border border-transparent text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-300"
+
+          {/* Logout Button */}
+          <button
+            onClick={() => {
+              if (isMobile) onClose();
+              handleLogout();
+            }}
+            className="w-full group flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all duration-250 ease-out border border-transparent text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
+          >
+            <motion.span
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="flex items-center justify-center transition-transform group-hover:-translate-x-0.5"
             >
-              <motion.span
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className="flex items-center justify-center transition-transform group-hover:translate-x-0.5"
-              >
-                <FiLogOut size={18} />
-              </motion.span>
-              <span className="tracking-wide">Logout</span>
-            </button>
+              <FiLogOut size={16} />
+            </motion.span>
+            <span className="tracking-wide">Sign Out</span>
+          </button>
         </div>
       </aside>
 
